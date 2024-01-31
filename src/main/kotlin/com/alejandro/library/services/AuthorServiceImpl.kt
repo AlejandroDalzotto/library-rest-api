@@ -1,8 +1,9 @@
 package com.alejandro.library.services
 
 import com.alejandro.library.models.*
+import com.alejandro.library.payloads.bodyrequest.AuthorRequest
 import com.alejandro.library.payloads.dto.AuthorDTO
-import com.alejandro.library.payloads.bodyrequest.BookRequest
+import com.alejandro.library.payloads.dto.BookDTO
 import com.alejandro.library.repositories.AuthorRepository
 import com.alejandro.library.repositories.BookRepository
 import org.springframework.beans.factory.annotation.Autowired
@@ -11,7 +12,7 @@ import org.springframework.stereotype.Service
 import org.springframework.web.servlet.resource.NoResourceFoundException
 
 @Service
-class AuthorServiceImpl: AuthorService<AuthorDTO, Long> {
+class AuthorServiceImpl: AuthorService<AuthorRequest, AuthorDTO, Long> {
 
     // Dependency injection's
     @Autowired
@@ -24,11 +25,17 @@ class AuthorServiceImpl: AuthorService<AuthorDTO, Long> {
         return rep.getAllActive().toListAuthorDTO()
     }
 
-    override fun getBooksByAuthorBy(pk: Long): List<BookRequest> {
+    override fun getBooksByAuthorBy(pk: Long): List<BookDTO> {
+        val author = rep.findById(pk).orElseThrow {
+            throw NoResourceFoundException(HttpMethod.DELETE, "Entity with id $pk not found")
+        }
+
+        if (!author.state) throw NoResourceFoundException(HttpMethod.DELETE, "Entity with id $pk not found")
+
         return bookRep.getByAuthorId(pk).toListBookDTO()
     }
 
-    override fun countAll(): Int {
+    override fun countAll(): Long {
         return rep.countAll()
     }
 
@@ -37,16 +44,17 @@ class AuthorServiceImpl: AuthorService<AuthorDTO, Long> {
             throw NoResourceFoundException(HttpMethod.DELETE, "Entity with id $pk not found")
         }
 
-        if (!author.getState()) throw NoResourceFoundException(HttpMethod.DELETE, "Entity with id $pk not found")
+        if (!author.state) throw NoResourceFoundException(HttpMethod.DELETE, "Entity with id $pk not found")
 
         rep.disableBook(pk)
         return author.toAuthorDTO()
     }
 
-    override fun save(dto: AuthorDTO): AuthorDTO {
+    override fun save(br: AuthorRequest): AuthorDTO {
         return rep.save(
             Author(
-                name = dto.name,
+                name = br.name,
+                country = br.country,
                 books = emptyList()
             )
         ).toAuthorDTO()
@@ -57,7 +65,7 @@ class AuthorServiceImpl: AuthorService<AuthorDTO, Long> {
             throw NoResourceFoundException(HttpMethod.GET, "Entity with id $pk not found")
         }
 
-        if(!author.getState()) throw NoResourceFoundException(HttpMethod.GET, "Entity with id $pk not found")
+        if(!author.state) throw NoResourceFoundException(HttpMethod.GET, "Entity with id $pk not found")
 
         return author.toAuthorDTO()
     }

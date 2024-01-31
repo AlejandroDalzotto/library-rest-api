@@ -1,7 +1,9 @@
 package com.alejandro.library.controllers
 
+import com.alejandro.library.payloads.bodyrequest.AuthorRequest
 import com.alejandro.library.payloads.dto.AuthorDTO
 import com.alejandro.library.payloads.serverresponse.AuthorResponse
+import com.alejandro.library.payloads.serverresponse.BookResponse
 import com.alejandro.library.services.AuthorServiceImpl
 import jakarta.transaction.Transactional
 import jakarta.validation.Valid
@@ -31,13 +33,13 @@ class AuthorController @Autowired constructor(
         val count = service.countAll()
         return ResponseEntity.ok().body(
             AuthorResponse(
-            count = count,
-            next = null,
-            previous = null,
-            error = null,
-            success = true,
-            result = result
-        )
+                count = count,
+                next = null,
+                previous = null,
+                error = null,
+                success = true,
+                result = result
+            )
         )
     }
 
@@ -47,52 +49,47 @@ class AuthorController @Autowired constructor(
 
         return ResponseEntity.ok().body(
             AuthorResponse(
-            count = 1,
-            next = null,
-            previous = null,
-            error = null,
-            success = true,
-            result = listOf(author)
-        )
+                count = 1,
+                next = null,
+                previous = null,
+                error = null,
+                success = true,
+                result = listOf(author)
+            )
         )
     }
 
     @GetMapping("/author/{id}/books")
-    fun getBooks(@PathVariable(name = "id") id: Long): ResponseEntity<AuthorResponse> {
+    fun getBooks(@PathVariable(name = "id") id: Long): ResponseEntity<BookResponse> {
         val books = service.getBooksByAuthorBy(id)
-
-
+        println("id: $id")
+        println("books: $books")
 
         return ResponseEntity.ok().body(
-            AuthorResponse(
-            count = 1,
-            next = null,
-            previous = null,
-            error = null,
-            success = true,
-            result = listOf(
-                AuthorDTO(
-                name = "Lo que sea",
-                books
+            BookResponse(
+                count = 1,
+                next = null,
+                previous = null,
+                error = null,
+                success = true,
+                result = books
             )
-            )
-        )
         )
     }
 
     @PostMapping("/author/create")
-    fun save(@RequestBody @Valid authorDTO: AuthorDTO): ResponseEntity<AuthorResponse> {
-        val author = service.save(authorDTO)
+    fun save(@RequestBody @Valid bodyRequest: AuthorRequest): ResponseEntity<AuthorResponse> {
+        val author = service.save(bodyRequest)
 
         return ResponseEntity.status(HttpStatus.CREATED).body(
             AuthorResponse(
-            count = 1,
-            next = null,
-            previous = null,
-            error = null,
-            success = true,
-            result = listOf(author)
-        )
+                count = 1,
+                next = null,
+                previous = null,
+                error = null,
+                success = true,
+                result = listOf(author)
+            )
         )
     }
 

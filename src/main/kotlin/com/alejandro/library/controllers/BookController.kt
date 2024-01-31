@@ -39,61 +39,64 @@ class BookController @Autowired constructor(
         val count = service.countAll()
         return ResponseEntity.ok().body(
             BookResponse(
-            count = count,
-            next = null,
-            previous = null,
-            error = null,
-            success = true,
-            result = result
-        )
+                count = count,
+                next = null,
+                previous = null,
+                error = null,
+                success = true,
+                result = result
+            )
         )
     }
 
+    // Filter by term and return the results.
     @GetMapping("/book/filter")
     fun getAllByTerm(@RequestParam(name = "term") term: String): ResponseEntity<BookResponse> {
         val result = service.getAllByTerm(term)
         val count = service.countByTerm(term)
         return ResponseEntity.ok().body(
             BookResponse(
-            count = count,
-            next = null,
-            previous = null,
-            error = null,
-            success = true,
-            result = result
-        )
+                count = count,
+                next = null,
+                previous = null,
+                error = null,
+                success = true,
+                result = result
+            )
         )
     }
 
+    // Get one book by his id.
     @GetMapping("/book/{id}")
     fun getById(@PathVariable id: Long): ResponseEntity<BookResponse> {
         val book = service.getById(id)
 
         return ResponseEntity.ok().body(
             BookResponse(
-            count = 1,
-            next = null,
-            previous = null,
-            error = null,
-            success = true,
-            result = listOf(book)
-        )
+                count = 1,
+                next = null,
+                previous = null,
+                error = null,
+                success = true,
+                result = listOf(book)
+            )
         )
     }
 
+    // Create a new book in database
     @PostMapping("/book/create")
     fun save(@RequestBody @Valid bodyRequest: BookRequest): ResponseEntity<BookResponse> {
         val book = service.save(bodyRequest)
 
         return ResponseEntity.status(HttpStatus.CREATED).body(
             BookResponse(
-            count = 1,
-            next = null,
-            previous = null,
-            error = null,
-            success = true,
-            result = listOf(book)
-        )
+                count = 1,
+                next = null,
+                previous = null,
+                error = null,
+                success = true,
+                result = listOf(book)
+            )
         )
     }
 

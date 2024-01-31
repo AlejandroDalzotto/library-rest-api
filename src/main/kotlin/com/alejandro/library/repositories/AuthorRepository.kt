@@ -13,11 +13,14 @@ interface AuthorRepository: JpaRepository<Author, Long> {
     @Query(value = "SELECT * FROM authors a WHERE a.state = true", nativeQuery = true)
     fun getAllActive(): List<Author>
 
-    @Query(value = "SELECT * FROM authors a WHERE a.name = :name", nativeQuery = true)
+    @Query(value = "SELECT * FROM authors a WHERE a.name = :name AND a.state = true", nativeQuery = true)
     fun getByName(@Param("name") name: String): Author
 
     @Query(value = "SELECT COUNT(a.id_author) FROM authors a WHERE a.state = true", nativeQuery = true)
-    fun countAll(): Int
+    fun countAll(): Long
+
+    @Query(value = "SELECT COUNT(a.id_author) FROM authors a WHERE a.name = :name AND a.state = true", nativeQuery = true)
+    fun existsByName(@Param("name") name: String): Long
 
     @Modifying
     @Query(value = "UPDATE authors SET state = false WHERE id_author = :id", nativeQuery = true)

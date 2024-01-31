@@ -2,6 +2,7 @@ package com.alejandro.library.models
 
 import com.alejandro.library.payloads.dto.AuthorDTO
 import com.alejandro.library.payloads.dto.BookDTO
+import com.fasterxml.jackson.annotation.JsonManagedReference
 import jakarta.persistence.*
 
 @Entity
@@ -10,34 +11,30 @@ data class Author(
     // All the properties of the constructor.
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private val idAuthor: Long = 0,
+    val idAuthor: Long = 0,
 
     @Column(name = "name", length = 35, nullable = false, unique = true)
-    private var name: String,
+    var name: String,
+
+    @Column(name = "country", length = 20, nullable = false)
+    var country: String,
 
     @Column(name = "state")
-    private var state: Boolean = true,
+    var state: Boolean = true,
 
     @Column(name = "books")
-    @OneToMany(mappedBy = "author", targetEntity = Book::class)
-    private var books: List<Book>,
-) {
-
-    fun getName(): String {
-        return this.name
-    }
-
-    fun getState(): Boolean {
-        return this.state
-    }
-
-    fun getBooks(): List<BookDTO> {
-        return this.books.toListBookDTO()
-    }
-}
+    @JsonManagedReference
+    @OneToMany(mappedBy = "author", targetEntity = Book::class, fetch = FetchType.LAZY, cascade = [CascadeType.ALL])
+    var books: List<Book>,
+)
 
 fun Author.toAuthorDTO(): AuthorDTO {
-    return AuthorDTO(this.getName(), this.getBooks())
+    return AuthorDTO(
+        id = idAuthor,
+        name = name,
+        country = country,
+        books = books.toListBookDTO()
+    )
 }
 
 fun List<Author>.toListAuthorDTO(): List<AuthorDTO> {

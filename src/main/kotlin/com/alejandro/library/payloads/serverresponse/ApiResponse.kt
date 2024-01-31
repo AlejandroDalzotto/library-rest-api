@@ -13,7 +13,7 @@ interface ApiResponse<T> {
     val previous: String?
 
     // Amount of elements.
-    val count: Int
+    val count: Long
 
     // The list with the results.
     val result: List<T>?

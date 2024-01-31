@@ -1,6 +1,6 @@
 package com.alejandro.library.services
 
-interface BookService<DTO, PK> {
+interface BookService<in BR, out DTO, in PK> {
 
     // Basics create and read methods
     fun getAll(): List<DTO>
@@ -9,12 +9,12 @@ interface BookService<DTO, PK> {
 
     fun getAllByTerm(term: String): List<DTO>
 
-    fun save(dto: DTO): DTO
+    fun save(br: BR): DTO
 
     fun deleteById(pk: PK): DTO
 
     // Count custom queries
-    fun countAll(): Int
+    fun countAll(): Long
 
-    fun countByTerm(term: String): Int
+    fun countByTerm(term: String): Long
 }

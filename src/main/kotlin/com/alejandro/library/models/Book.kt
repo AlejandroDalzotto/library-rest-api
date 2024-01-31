@@ -1,5 +1,6 @@
 package com.alejandro.library.models
 
+import com.alejandro.library.payloads.dto.AuthorDTO
 import com.alejandro.library.payloads.dto.BookDTO
 import com.fasterxml.jackson.annotation.JsonBackReference
 import jakarta.persistence.Column
@@ -18,37 +19,20 @@ data class Book(
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     /* "val" it is for inmutable values. */
-    private val idBook: Long = 0,
+    val idBook: Long = 0,
 
     /* "var" it is for mutable values. */
-    @Column(name = "name", length = 35, nullable = false, unique = true)
-    private var name: String,
+    @Column(name = "name", length = 50, nullable = false, unique = true)
+    var name: String,
 
-    @JsonBackReference(value = "author")
-    @JoinColumn(name = "idAuthor")
+    @JsonBackReference
     @ManyToOne
-    private var author: Author,
+    @JoinColumn(name = "idAuthor")
+    var author: Author,
 
     @Column(name = "state")
-    private var state: Boolean = true
-) {
-
-    fun getId(): Long {
-        return this.idBook
-    }
-
-    fun getName(): String {
-        return this.name
-    }
-
-    fun getAuthor(): Author {
-        return this.author
-    }
-
-    fun getState(): Boolean {
-        return this.state
-    }
-}
+    var state: Boolean = true
+)
 
 /**
  * Extension functions for the book to be converted to BookDTO.
@@ -56,9 +40,10 @@ data class Book(
  */
 fun Book.toBookDTO(): BookDTO {
     return BookDTO(
-        id = this.getId(),
-        name = this.getName(),
-        author = this.getAuthor().getName()
+        id = idBook,
+        name = name,
+        author = author.name,
+        authorCountry = author.country,
     )
 }
 
