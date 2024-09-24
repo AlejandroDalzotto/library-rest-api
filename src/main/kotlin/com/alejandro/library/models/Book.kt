@@ -16,6 +16,7 @@ import jakarta.persistence.Table
 data class Book(
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @Column(name = "id_book")
     val id: Long = 0,
 
     @Column(length = 50, nullable = false, unique = true)
@@ -23,7 +24,7 @@ data class Book(
 
     @JsonBackReference
     @ManyToOne
-    @JoinColumn(name = "id")
+    @JoinColumn(name = "id_author")
     val author: Author,
 
     val active: Boolean = true

@@ -9,6 +9,7 @@ import jakarta.persistence.*
 data class Author(
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @Column(name = "id_author")
     val id: Long = 0,
 
     @Column(length = 35, nullable = false, unique = true)
