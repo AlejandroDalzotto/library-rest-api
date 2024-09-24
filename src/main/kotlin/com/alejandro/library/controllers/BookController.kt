@@ -1,7 +1,8 @@
 package com.alejandro.library.controllers
 
-import com.alejandro.library.payloads.bodyrequest.BookRequest
-import com.alejandro.library.payloads.serverresponse.BookResponse
+import com.alejandro.library.payloads.ApiResponse
+import com.alejandro.library.payloads.dto.BookDTO
+import com.alejandro.library.payloads.request.BookRequest
 import com.alejandro.library.services.BookServiceImpl
 import jakarta.transaction.Transactional
 import jakarta.validation.Valid
@@ -34,87 +35,43 @@ class BookController @Autowired constructor(
 
     // get all information from books
     @GetMapping("/book/all")
-    fun getAll(): ResponseEntity<BookResponse> {
+    fun getAll(): ResponseEntity<ApiResponse<BookDTO>> {
         val result = service.getAll()
-        val count = service.countAll()
-        return ResponseEntity.ok().body(
-            BookResponse(
-                count = count,
-                next = null,
-                previous = null,
-                error = null,
-                success = true,
-                result = result
-            )
-        )
+        val response = ApiResponse(result, null)
+        return ResponseEntity.ok().body(response)
     }
 
     // Filter by term and return the results.
     @GetMapping("/book/filter")
-    fun getAllByTerm(@RequestParam(name = "term") term: String): ResponseEntity<BookResponse> {
+    fun getAllByTerm(@RequestParam(name = "term") term: String): ResponseEntity<ApiResponse<BookDTO>> {
         val result = service.getAllByTerm(term)
-        val count = service.countByTerm(term)
-        return ResponseEntity.ok().body(
-            BookResponse(
-                count = count,
-                next = null,
-                previous = null,
-                error = null,
-                success = true,
-                result = result
-            )
-        )
+        val response = ApiResponse(result, null)
+        return ResponseEntity.ok().body(response)
     }
 
     // Get one book by his id.
     @GetMapping("/book/{id}")
-    fun getById(@PathVariable id: Long): ResponseEntity<BookResponse> {
+    fun getById(@PathVariable id: Long): ResponseEntity<ApiResponse<BookDTO>> {
         val book = service.getById(id)
-
-        return ResponseEntity.ok().body(
-            BookResponse(
-                count = 1,
-                next = null,
-                previous = null,
-                error = null,
-                success = true,
-                result = listOf(book)
-            )
-        )
+        val response = ApiResponse(setOf(book), null)
+        return ResponseEntity.ok().body(response)
     }
 
     // Create a new book in database
     @PostMapping("/book/create")
-    fun save(@RequestBody @Valid bodyRequest: BookRequest): ResponseEntity<BookResponse> {
+    fun save(@RequestBody @Valid bodyRequest: BookRequest): ResponseEntity<ApiResponse<BookDTO>> {
         val book = service.save(bodyRequest)
-
-        return ResponseEntity.status(HttpStatus.CREATED).body(
-            BookResponse(
-                count = 1,
-                next = null,
-                previous = null,
-                error = null,
-                success = true,
-                result = listOf(book)
-            )
-        )
+        val response = ApiResponse(setOf(book), "Book saved successfully.")
+        return ResponseEntity.status(HttpStatus.CREATED).body(response)
     }
 
     @Transactional
     @DeleteMapping("/book/delete/{id}")
-    fun delete(@PathVariable(name = "id") id: Long): ResponseEntity<BookResponse> {
+    fun delete(@PathVariable(name = "id") id: Long): ResponseEntity<ApiResponse<BookDTO>> {
 
         val bookDeleted = service.deleteById(id)
+        val response = ApiResponse(setOf(bookDeleted), "Book removed successfully.")
 
-        return ResponseEntity.ok().body(
-            BookResponse(
-                next = null,
-                previous = null,
-                count = 1,
-                success = true,
-                result = listOf(bookDeleted),
-                error = null
-            )
-        )
+        return ResponseEntity.ok().body(response)
     }
 }

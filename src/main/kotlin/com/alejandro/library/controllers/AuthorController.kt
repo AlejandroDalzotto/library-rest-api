@@ -1,16 +1,14 @@
 package com.alejandro.library.controllers
 
-import com.alejandro.library.payloads.bodyrequest.AuthorRequest
+import com.alejandro.library.payloads.ApiResponse
 import com.alejandro.library.payloads.dto.AuthorDTO
-import com.alejandro.library.payloads.serverresponse.AuthorResponse
-import com.alejandro.library.payloads.serverresponse.BookResponse
+import com.alejandro.library.payloads.request.AuthorRequest
 import com.alejandro.library.services.AuthorServiceImpl
 import jakarta.transaction.Transactional
 import jakarta.validation.Valid
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.http.HttpStatus
 import org.springframework.http.ResponseEntity
-import org.springframework.web.bind.annotation.CrossOrigin
 import org.springframework.web.bind.annotation.DeleteMapping
 import org.springframework.web.bind.annotation.GetMapping
 import org.springframework.web.bind.annotation.PathVariable
@@ -21,93 +19,39 @@ import org.springframework.web.bind.annotation.RestController
 
 @RestController
 @RequestMapping("/api")
-@CrossOrigin("*")
 /* Dependency injection through the constructor. */
 class AuthorController @Autowired constructor(
     private val service: AuthorServiceImpl
 ) {
 
     @GetMapping("/author/all")
-    fun getAll(): ResponseEntity<AuthorResponse> {
+    fun getAll(): ResponseEntity<ApiResponse<AuthorDTO>> {
         val result = service.getAll()
-        val count = service.countAll()
-        return ResponseEntity.ok().body(
-            AuthorResponse(
-                count = count,
-                next = null,
-                previous = null,
-                error = null,
-                success = true,
-                result = result
-            )
-        )
+        val response = ApiResponse(result, null)
+        return ResponseEntity.ok().body(response)
     }
 
     @GetMapping("/author/{id}")
-    fun getById(@PathVariable id: Long): ResponseEntity<AuthorResponse> {
+    fun getById(@PathVariable id: Long): ResponseEntity<ApiResponse<AuthorDTO>> {
         val author = service.getById(id)
-
-        return ResponseEntity.ok().body(
-            AuthorResponse(
-                count = 1,
-                next = null,
-                previous = null,
-                error = null,
-                success = true,
-                result = listOf(author)
-            )
-        )
-    }
-
-    @GetMapping("/author/{id}/books")
-    fun getBooks(@PathVariable(name = "id") id: Long): ResponseEntity<BookResponse> {
-        val books = service.getBooksByAuthorBy(id)
-        println("id: $id")
-        println("books: $books")
-
-        return ResponseEntity.ok().body(
-            BookResponse(
-                count = 1,
-                next = null,
-                previous = null,
-                error = null,
-                success = true,
-                result = books
-            )
-        )
+        val response = ApiResponse(setOf(author), null)
+        return ResponseEntity.ok().body(response)
     }
 
     @PostMapping("/author/create")
-    fun save(@RequestBody @Valid bodyRequest: AuthorRequest): ResponseEntity<AuthorResponse> {
+    fun save(@RequestBody @Valid bodyRequest: AuthorRequest): ResponseEntity<ApiResponse<AuthorDTO>> {
         val author = service.save(bodyRequest)
-
-        return ResponseEntity.status(HttpStatus.CREATED).body(
-            AuthorResponse(
-                count = 1,
-                next = null,
-                previous = null,
-                error = null,
-                success = true,
-                result = listOf(author)
-            )
-        )
+        val response = ApiResponse(setOf(author), "Author saved successfully.")
+        return ResponseEntity.status(HttpStatus.CREATED).body(response)
     }
 
     @Transactional
     @DeleteMapping("/author/delete/{id}")
-    fun delete(@PathVariable(name = "id") id: Long): ResponseEntity<AuthorResponse> {
+    fun delete(@PathVariable(name = "id") id: Long): ResponseEntity<ApiResponse<AuthorDTO>> {
 
         val authorDeleted = service.deleteById(id)
+        val response = ApiResponse(setOf(authorDeleted), "Author removed successfully.")
 
-        return ResponseEntity.ok().body(
-            AuthorResponse(
-                next = null,
-                previous = null,
-                count = 1,
-                success = true,
-                result = listOf(authorDeleted),
-                error = null
-            )
-        )
+        return ResponseEntity.ok().body(response)
     }
 }

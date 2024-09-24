@@ -1,6 +1,6 @@
 package com.alejandro.library.exceptions
 
-import com.alejandro.library.payloads.serverresponse.BookResponse
+import com.alejandro.library.payloads.ApiErrorResponse
 import org.springframework.beans.TypeMismatchException
 import org.springframework.http.HttpHeaders
 import org.springframework.http.HttpStatus
@@ -29,16 +29,9 @@ class ValidationHandler : ResponseEntityExceptionHandler() {
             val message = error.getDefaultMessage()
             errors[fieldName] = message
         })
-        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(
-            BookResponse(
-                next = null,
-                previous = null,
-                count = 0,
-                success = false,
-                result = null,
-                error = errors
-            )
-        )
+
+        val response = ApiErrorResponse(message = "Something went wrong.", errors)
+        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(response)
     }
 
     override fun handleTypeMismatch(
@@ -47,16 +40,8 @@ class ValidationHandler : ResponseEntityExceptionHandler() {
         status: HttpStatusCode,
         request: WebRequest
     ): ResponseEntity<Any>? {
-        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(
-            BookResponse(
-                success = false,
-                count = 0,
-                error = ex.message ?: "Something went wrong, not message provided.",
-                next = null,
-                previous = null,
-                result = null
-            )
-        )
+        val response = ApiErrorResponse(message = "Something went wrong.", errors = null)
+        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(response)
     }
 
     override fun handleNoResourceFoundException(
@@ -65,27 +50,13 @@ class ValidationHandler : ResponseEntityExceptionHandler() {
         status: HttpStatusCode,
         request: WebRequest
     ): ResponseEntity<Any>? {
-        return ResponseEntity.status(HttpStatus.NOT_FOUND).body(
-            BookResponse(
-                success = false,
-                count = 0,
-                error = ex.message ?: "Something went wrong, not message provided.",
-                next = null,
-                previous = null,
-                result = null
-            )
-        )
+        val response = ApiErrorResponse(message = "Something went wrong.", errors = null)
+        return ResponseEntity.status(HttpStatus.NOT_FOUND).body(response)
     }
 
     @ExceptionHandler(InvalidTypeException::class)
-    fun invalidTypeHandler(ex: InvalidTypeException): BookResponse {
-        return BookResponse(
-            success = false,
-            count = 0,
-            error = ex.message ?: "Something went wrong, not message provided.",
-            next = null,
-            previous = null,
-            result = null
-        )
+    fun invalidTypeHandler(ex: InvalidTypeException): ResponseEntity<Any>? {
+        val response = ApiErrorResponse(message = "Something went wrong.", errors = null)
+        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(response)
     }
 }

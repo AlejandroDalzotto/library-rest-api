@@ -2,9 +2,9 @@ package com.alejandro.library.services
 
 import com.alejandro.library.models.Author
 import com.alejandro.library.models.Book
-import com.alejandro.library.models.toBookDTO
-import com.alejandro.library.models.toListBookDTO
-import com.alejandro.library.payloads.bodyrequest.BookRequest
+import com.alejandro.library.models.toDto
+import com.alejandro.library.models.toSetDto
+import com.alejandro.library.payloads.request.BookRequest
 import com.alejandro.library.payloads.dto.BookDTO
 import com.alejandro.library.repositories.AuthorRepository
 import com.alejandro.library.repositories.BookRepository
@@ -14,17 +14,13 @@ import org.springframework.stereotype.Service
 import org.springframework.web.servlet.resource.NoResourceFoundException
 
 @Service
-class BookServiceImpl : BookService<BookRequest, BookDTO, Long> {
+class BookServiceImpl @Autowired constructor(
+    private val rep: BookRepository,
+    private val repAuthor: AuthorRepository
+): BookService<BookRequest, BookDTO, Long> {
 
-    /* Dependency injection's */
-    @Autowired
-    private lateinit var rep: BookRepository
-
-    @Autowired
-    private lateinit var repAuthor: AuthorRepository
-
-    override fun getAll(): List<BookDTO> {
-        return rep.getAllActive().toListBookDTO()
+    override fun getAll(): Set<BookDTO> {
+        return rep.findAllByActiveTrue().toSetDto()
     }
 
     override fun getById(pk: Long): BookDTO {
@@ -32,13 +28,13 @@ class BookServiceImpl : BookService<BookRequest, BookDTO, Long> {
             throw NoResourceFoundException(HttpMethod.GET, "Entity with id $pk not found")
         }
 
-        if (!book.state) throw NoResourceFoundException(HttpMethod.GET, "Entity with id $pk not found")
+        if (!book.active) throw NoResourceFoundException(HttpMethod.GET, "Entity with id $pk not found")
 
-        return book.toBookDTO()
+        return book.toDto()
     }
 
-    override fun getAllByTerm(term: String): List<BookDTO> {
-        return rep.getAllByTerm(term.lowercase()).toListBookDTO()
+    override fun getAllByTerm(term: String): Set<BookDTO> {
+        return rep.findAllByNameIgnoreCaseContaining(term.lowercase()).toSetDto()
     }
 
     override fun deleteById(pk: Long): BookDTO {
@@ -46,42 +42,34 @@ class BookServiceImpl : BookService<BookRequest, BookDTO, Long> {
             throw NoResourceFoundException(HttpMethod.DELETE, "Entity with id $pk not found")
         }
 
-        if (!book.state) throw NoResourceFoundException(HttpMethod.DELETE, "Entity with id $pk not found")
+        if (!book.active) throw NoResourceFoundException(HttpMethod.DELETE, "Entity with id $pk not found")
 
         rep.disableBook(pk)
-        return book.toBookDTO()
+        return book.toDto()
     }
 
     override fun save(br: BookRequest): BookDTO {
 
-        val authorExist = repAuthor.existsByName(br.author.name) > 0
+        val authorExist = repAuthor.existsByNameAndActiveTrue(br.author.name)
 
         if (!authorExist) {
             repAuthor.save(
                 Author(
                     name = br.author.name,
                     country = br.author.country,
-                    books = emptyList()
+                    books = emptySet()
                 )
             )
         }
 
-        val author = repAuthor.getByName(br.author.name)
+        val author = repAuthor.findByNameAndActiveTrue(br.author.name)
 
         return rep.save(
             Book(
                 name = br.name,
                 author = author
             )
-        ).toBookDTO()
-    }
-
-    override fun countAll(): Long {
-        return rep.countAll()
-    }
-
-    override fun countByTerm(term: String): Long {
-        return rep.countAllByTerm(term.lowercase())
+        ).toDto()
     }
 
 }

@@ -17,25 +17,10 @@ import org.springframework.stereotype.Repository
 @Repository
 interface BookRepository : JpaRepository<Book, Long> {
 
-    @Query(value = "SELECT * FROM books b WHERE b.state = true", nativeQuery = true)
-    fun getAllActive(): List<Book>
+    fun findAllByActiveTrue(): Set<Book>
 
     @Query(value = "SELECT * FROM books b WHERE LOWER(b.name) LIKE %:term% AND b.state = true", nativeQuery = true)
-    fun getAllByTerm(@Param("term") term: String): List<Book>
-
-    @Query(
-        value = "SELECT b.id_book, b.name, b.id_author, b.state " +
-                "FROM books b JOIN authors a ON b.id_author = a.id_author " +
-                "WHERE a.id_author = :id AND b.state = true",
-        nativeQuery = true
-    )
-    fun getByAuthorId(@Param("id") id: Long): List<Book>
-
-    @Query(value = "SELECT COUNT(b.id_book) FROM books b WHERE b.state = true", nativeQuery = true)
-    fun countAll(): Long
-
-    @Query(value = "SELECT COUNT(b.id_book) FROM books b WHERE LOWER(b.name) LIKE %:term% AND b.state = true", nativeQuery = true)
-    fun countAllByTerm(@Param("term") term: String): Long
+    fun findAllByNameIgnoreCaseContaining(term: String): Set<Book>
 
     @Modifying
     @Query(value = "UPDATE books SET state = false WHERE id_book = :id", nativeQuery = true)

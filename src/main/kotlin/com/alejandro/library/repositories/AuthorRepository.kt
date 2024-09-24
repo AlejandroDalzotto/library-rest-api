@@ -8,19 +8,12 @@ import org.springframework.data.repository.query.Param
 import org.springframework.stereotype.Repository
 
 @Repository
-interface AuthorRepository: JpaRepository<Author, Long> {
+interface AuthorRepository : JpaRepository<Author, Long> {
+    fun findAllByActiveTrue(): Set<Author>
 
-    @Query(value = "SELECT * FROM authors a WHERE a.state = true", nativeQuery = true)
-    fun getAllActive(): List<Author>
+    fun findByNameAndActiveTrue(name: String): Author
 
-    @Query(value = "SELECT * FROM authors a WHERE a.name = :name AND a.state = true", nativeQuery = true)
-    fun getByName(@Param("name") name: String): Author
-
-    @Query(value = "SELECT COUNT(a.id_author) FROM authors a WHERE a.state = true", nativeQuery = true)
-    fun countAll(): Long
-
-    @Query(value = "SELECT COUNT(a.id_author) FROM authors a WHERE a.name = :name AND a.state = true", nativeQuery = true)
-    fun existsByName(@Param("name") name: String): Long
+    fun existsByNameAndActiveTrue(name: String): Boolean
 
     @Modifying
     @Query(value = "UPDATE authors SET state = false WHERE id_author = :id", nativeQuery = true)

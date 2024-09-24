@@ -1,6 +1,5 @@
 package com.alejandro.library.models
 
-import com.alejandro.library.payloads.dto.AuthorDTO
 import com.alejandro.library.payloads.dto.BookDTO
 import com.fasterxml.jackson.annotation.JsonBackReference
 import jakarta.persistence.Column
@@ -15,38 +14,25 @@ import jakarta.persistence.Table
 @Entity
 @Table(name = "books")
 data class Book(
-    /* All the properties of the constructor. */
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    /* "val" it is for inmutable values. */
-    val idBook: Long = 0,
+    val id: Long = 0,
 
-    /* "var" it is for mutable values. */
-    @Column(name = "name", length = 50, nullable = false, unique = true)
-    var name: String,
+    @Column(length = 50, nullable = false, unique = true)
+    val name: String,
 
     @JsonBackReference
     @ManyToOne
-    @JoinColumn(name = "idAuthor")
-    var author: Author,
+    @JoinColumn(name = "id")
+    val author: Author,
 
-    @Column(name = "state")
-    var state: Boolean = true
+    val active: Boolean = true
 )
 
-/**
- * Extension functions for the book to be converted to BookDTO.
- * About extensions [here](https://kotlinlang.org/docs/extensions.html).
- */
-fun Book.toBookDTO(): BookDTO {
-    return BookDTO(
-        id = idBook,
-        name = name,
-        author = author.name,
-        authorCountry = author.country,
-    )
+fun Book.toDto(): BookDTO {
+    return BookDTO(this.name, this.author.name, this.author.country)
 }
 
-fun List<Book>.toListBookDTO(): List<BookDTO> {
-    return this.map { it.toBookDTO() }
+fun Set<Book>.toSetDto(): Set<BookDTO> {
+    return this.map { BookDTO(it.name, it.author.name, it.author.country) }.toSet()
 }

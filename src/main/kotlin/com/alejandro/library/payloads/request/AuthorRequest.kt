@@ -1,4 +1,4 @@
-package com.alejandro.library.payloads.bodyrequest
+package com.alejandro.library.payloads.request
 
 import jakarta.validation.constraints.NotBlank
 import jakarta.validation.constraints.NotNull
